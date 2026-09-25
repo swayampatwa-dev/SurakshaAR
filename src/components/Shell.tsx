@@ -3,6 +3,7 @@ import { HardHat, LogOut, Wifi, WifiOff } from 'lucide-react'
 import { t } from '../i18n'
 import { useStore } from '../store'
 import type { Lang } from '../types'
+import { SafetyChatbot } from './SafetyChatbot'
 
 const langs: { id: Lang; label: string }[] = [
   { id: 'en', label: 'EN' },
@@ -185,6 +186,7 @@ export function Shell({
         </div>
       </header>
       {children}
+      <SafetyChatbot />
     </div>
   )
 }

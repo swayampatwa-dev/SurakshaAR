@@ -51,6 +51,36 @@ export const ui: Dict = {
     hi: 'AR मॉडल',
     sat: 'AR ᱢᱚᱰᱮᱞ',
   },
+  chatTitle: {
+    en: 'Safety Chat',
+    hi: 'सेफ्टी चैट',
+    sat: 'ᱥᱮᱯᱷᱴᱤ ᱪᱮᱴ',
+  },
+  chatSub: {
+    en: 'Ask about AR training, PASS, PPE, LOTO…',
+    hi: 'AR प्रशिक्षण, PASS, PPE, LOTO पूछें…',
+    sat: 'AR, PASS, PPE, LOTO ᱠᱩᱞᱤ…',
+  },
+  chatOpen: {
+    en: 'Open safety chat',
+    hi: 'सेफ्टी चैट खोलें',
+    sat: 'ᱪᱮᱴ ᱡᱷᱤᱡᱽ',
+  },
+  chatWelcome: {
+    en: 'Hi — I’m SurakshaAR Safety Chat. Ask how to start training, PASS for fire, PPE, LOTO, confined space, or certificates. Tap a chip or type below.',
+    hi: 'नमस्ते — मैं SurakshaAR सेफ्टी चैट हूँ। प्रशिक्षण शुरू करना, PASS, PPE, LOTO, सीमित स्थान या प्रमाणपत्र पूछें। चिप्स टैप करें या टाइप करें।',
+    sat: 'ᱡᱚᱦᱟᱨ — SurakshaAR Safety Chat᱾ Training, PASS, PPE, LOTO, certificate ᱠᱩᱞᱤᱭᱟᱹᱢᱮ᱾',
+  },
+  chatPlaceholder: {
+    en: 'Ask a safety question…',
+    hi: 'सेफ्टी सवाल लिखें…',
+    sat: 'ᱠᱩᱞᱤ ᱚᱞᱢᱮ…',
+  },
+  chatEmpty: {
+    en: 'Type a short question, or tap a chip.',
+    hi: 'छोटा सवाल लिखें, या चिप्स टैप करें।',
+    sat: 'ᱠᱩᱞᱤ ᱚᱞ ᱟᱨᱵᱟᱝ chip ᱴᱮᱯ᱾',
+  },
   wallet: {
     en: 'Certificate wallet',
     hi: 'प्रमाणपत्र वॉलेट',
