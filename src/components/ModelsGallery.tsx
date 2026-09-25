@@ -27,9 +27,7 @@ function LiveViewer({
   return (
     <div
       className={`relative w-full overflow-hidden bg-[#0c0d0e] ${
-        tall
-          ? 'h-full min-h-[55vh] rounded-none'
-          : 'h-[280px] rounded-xl border border-line sm:h-auto sm:aspect-[16/10] lg:aspect-[21/9] lg:max-h-[480px]'
+        tall ? 'h-full min-h-[50vh] rounded-none sm:min-h-0 sm:rounded-b-xl' : 'h-[280px] rounded-xl border border-line'
       }`}
     >
       <Canvas
@@ -108,20 +106,15 @@ function ModelCard({
           </div>
           <div className="truncate text-[12px] font-semibold text-bone sm:text-sm">{title}</div>
         </div>
-        <span className="absolute right-1.5 top-1.5 rounded bg-ink/80 px-1.5 py-0.5 text-[9px] font-semibold text-sand sm:hidden">
+        <span className="absolute right-1.5 top-1.5 rounded bg-ink/80 px-1.5 py-0.5 text-[9px] font-semibold text-sand group-hover:bg-safety group-hover:text-ink sm:right-2 sm:top-2 sm:px-2 sm:text-[10px]">
           Open
         </span>
-        {active && (
-          <span className="absolute left-1.5 top-1.5 hidden rounded bg-safety px-1.5 py-0.5 text-[9px] font-bold text-ink sm:left-auto sm:right-2 sm:top-2 sm:block sm:px-2 sm:text-[10px]">
-            LIVE
-          </span>
-        )}
       </div>
     </button>
   )
 }
 
-/** Full-screen popup for mobile — tap thumbnail → 3D + hotspots. */
+/** Popup 3D viewer — phone full-screen, laptop centered modal. */
 function ModelPopup({
   type,
   title,
@@ -150,31 +143,37 @@ function ModelPopup({
 
   return (
     <div
-      className="fixed inset-0 z-[80] flex flex-col bg-ink/95 backdrop-blur-sm sm:hidden"
+      className="fixed inset-0 z-[80] flex items-stretch justify-center bg-ink/90 p-0 backdrop-blur-sm sm:items-center sm:p-6"
       role="dialog"
       aria-modal="true"
       aria-label={title}
+      onClick={onClose}
     >
-      <div className="flex shrink-0 items-center gap-3 border-b border-line px-3 py-3">
-        <div className="min-w-0 flex-1">
-          <div className="truncate text-[10px] font-semibold uppercase tracking-wider text-muted">{module}</div>
-          <div className="truncate text-sm font-semibold text-bone">{title}</div>
+      <div
+        className="flex h-full w-full max-w-5xl flex-col overflow-hidden bg-coal shadow-[0_24px_80px_rgba(0,0,0,0.65)] sm:h-[min(85vh,720px)] sm:rounded-2xl sm:border sm:border-line"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex shrink-0 items-center gap-3 border-b border-line px-3 py-3 sm:px-5">
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-[10px] font-semibold uppercase tracking-wider text-muted">{module}</div>
+            <div className="truncate text-sm font-semibold text-bone sm:text-base">{title}</div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-panel text-soft hover:border-line-strong hover:text-bone"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-panel text-soft"
-          aria-label="Close"
-        >
-          <X className="h-5 w-5" />
-        </button>
+        <div className="min-h-0 flex-1">
+          <LiveViewer type={type} dragHint={dragHint} tall />
+        </div>
+        <p className="shrink-0 border-t border-line px-3 py-2.5 text-center text-[11px] text-muted sm:px-5">
+          Drag to rotate · click ● numbers for details · Esc to close
+        </p>
       </div>
-      <div className="min-h-0 flex-1">
-        <LiveViewer type={type} dragHint={dragHint} tall />
-      </div>
-      <p className="shrink-0 px-3 py-2.5 text-center text-[11px] text-muted">
-        Pinch / drag to rotate · tap ● for details
-      </p>
     </div>
   )
 }
@@ -184,18 +183,10 @@ export function ModelsGallery() {
   const [active, setActive] = useState<OverlayType>(AR_MODEL_CATALOG[0]?.type ?? 'exit')
   const [popupOpen, setPopupOpen] = useState(false)
   const current = AR_MODEL_CATALOG.find((m) => m.type === active) ?? AR_MODEL_CATALOG[0]
-  const [viewerKey, setViewerKey] = useState(0)
-
-  useEffect(() => {
-    setViewerKey((k) => k + 1)
-  }, [active])
 
   const openModel = (type: OverlayType) => {
     setActive(type)
-    // Mobile: open popup; desktop uses inline viewer (sm+)
-    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches) {
-      setPopupOpen(true)
-    }
+    setPopupOpen(true)
   }
 
   return (
@@ -210,15 +201,15 @@ export function ModelsGallery() {
         <section className="mt-5 sm:mt-8">
           <div className="mb-2.5 flex items-center justify-between gap-2">
             <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted">
-              All models · tap image to open
+              All models · click to open in popup
             </h3>
             <span className="text-[11px] font-medium text-safety">{AR_MODEL_CATALOG.length} total</span>
           </div>
 
-          <div className="grid grid-cols-2 gap-2.5 sm:hidden">
+          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:gap-3">
             {AR_MODEL_CATALOG.map((m) => (
               <ModelCard
-                key={`m-${m.type}`}
+                key={m.type}
                 type={m.type}
                 active={active === m.type && popupOpen}
                 title={m.name[language]}
@@ -227,38 +218,10 @@ export function ModelsGallery() {
               />
             ))}
           </div>
-
-          <div className="hidden gap-3 sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {AR_MODEL_CATALOG.map((m) => (
-              <ModelCard
-                key={m.type}
-                type={m.type}
-                active={active === m.type}
-                title={m.name[language]}
-                module={m.module[language]}
-                onSelect={() => setActive(m.type)}
-              />
-            ))}
-          </div>
         </section>
 
-        {/* Desktop / tablet inline stage */}
-        <section id="live-model-stage" className="mt-6 hidden scroll-mt-4 sm:mt-8 sm:block">
-          {current && (
-            <div className="mb-3">
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-muted">
-                {current.module[language]}
-              </div>
-              <h2 className="font-display text-lg text-bone sm:text-2xl">{current.name[language]}</h2>
-              <p className="mt-0.5 font-mono text-[11px] text-muted">{current.type}</p>
-            </div>
-          )}
-          <LiveViewer key={viewerKey} type={active} dragHint={t('dragOrbit', language)} />
-        </section>
-
-        {/* Mobile hint */}
-        <p className="mt-4 text-center text-xs text-muted sm:hidden">
-          Tap any model image — 3D opens in a popup
+        <p className="mt-4 text-center text-xs text-muted">
+          Click any model image — 3D opens in a popup on phone and laptop
         </p>
       </main>
 
