@@ -1,8 +1,10 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Float, ContactShadows, Html } from '@react-three/drei'
 import { DoubleSide, type Group } from 'three'
 import type { Lang, OverlayType } from '../types'
+import { MODEL_HOTSPOTS } from '../data/modelHotspots'
+import { useStore } from '../store'
 
 function SpinSlow({ children, speed = 0.4 }: { children: React.ReactNode; speed?: number }) {
   const ref = useRef<Group>(null)
@@ -47,6 +49,150 @@ function Label({
         {children}
       </div>
     </Html>
+  )
+}
+
+/** Numbered marker — small 3D dot so the model stays visible; tap opens info sheet. */
+export type HotspotInfo = { n: number; title: string; body: string }
+
+function HotspotMarker({
+  n,
+  position,
+  title,
+  open,
+  onToggle,
+}: {
+  n: number
+  position: [number, number, number]
+  title: string
+  open: boolean
+  onToggle: () => void
+}) {
+  return (
+    <group position={position}>
+      {/* Invisible larger hit area for easy tap */}
+      <mesh
+        onClick={(e) => {
+          e.stopPropagation()
+          onToggle()
+        }}
+        onPointerDown={(e) => e.stopPropagation()}
+      >
+        <sphereGeometry args={[0.16, 12, 12]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      </mesh>
+      <mesh
+        onClick={(e) => {
+          e.stopPropagation()
+          onToggle()
+        }}
+        onPointerDown={(e) => e.stopPropagation()}
+      >
+        <sphereGeometry args={[0.07, 16, 16]} />
+        <meshBasicMaterial color={open ? '#f5b800' : '#1c1914'} />
+      </mesh>
+      <mesh>
+        <sphereGeometry args={[0.078, 16, 16]} />
+        <meshBasicMaterial color={open ? '#f5b800' : '#ffffff'} wireframe transparent opacity={0.85} />
+      </mesh>
+      <Html center distanceFactor={14} style={{ pointerEvents: 'none' }} zIndexRange={[100, 0]}>
+        <div
+          aria-label={`${n}. ${title}`}
+          style={{
+            width: 14,
+            height: 14,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 9,
+            fontWeight: 800,
+            color: open ? '#14110d' : '#fff',
+            fontFamily: 'Barlow, system-ui, sans-serif',
+            lineHeight: 1,
+            userSelect: 'none',
+          }}
+        >
+          {n}
+        </div>
+      </Html>
+    </group>
+  )
+}
+
+function ModelHotspots({
+  type,
+  language,
+  onSelect,
+}: {
+  type: OverlayType
+  language: Lang
+  onSelect?: (info: HotspotInfo | null) => void
+}) {
+  const [active, setActive] = useState<number | null>(null)
+  const points = MODEL_HOTSPOTS[type] ?? []
+
+  useEffect(() => {
+    setActive(null)
+    onSelect?.(null)
+  }, [type]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!points.length) return null
+
+  return (
+    <group>
+      {points.map((p) => {
+        const title = p.title[language] || p.title.en
+        const body = p.body[language] || p.body.en
+        const open = active === p.n
+        return (
+          <HotspotMarker
+            key={p.n}
+            n={p.n}
+            position={p.position}
+            title={title}
+            open={open}
+            onToggle={() => {
+              const next = open ? null : p.n
+              setActive(next)
+              onSelect?.(next == null ? null : { n: p.n, title, body })
+            }}
+          />
+        )
+      })}
+    </group>
+  )
+}
+
+/** Bottom info card — readable on phone, same dark-card look as the reference. */
+export function HotspotSheet({
+  info,
+  onClose,
+}: {
+  info: HotspotInfo | null
+  onClose: () => void
+}) {
+  if (!info) return null
+  return (
+    <div className="pointer-events-auto absolute inset-x-0 bottom-0 z-30 p-2.5 sm:p-4" role="dialog" aria-label={info.title}>
+      <div className="mx-auto w-full max-w-lg rounded-xl border border-white/15 bg-[#16181c]/96 p-3 shadow-[0_12px_40px_rgba(0,0,0,0.55)] backdrop-blur-md sm:p-4">
+        <div className="flex items-start gap-3">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-safety text-sm font-extrabold text-ink">
+            {info.n}
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="text-[0.95rem] font-bold leading-snug text-white">{info.title}</div>
+            <p className="mt-1.5 text-[12.5px] leading-relaxed text-bone/85">{info.body}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="shrink-0 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-safety hover:bg-white/5"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -799,34 +945,57 @@ function SceneForType({ type }: { type: OverlayType }) {
   }
 }
 
-export function ArScene({ type }: { type: OverlayType }) {
-  return <SceneForType type={type} />
+export function ArScene({
+  type,
+  onHotspotSelect,
+}: {
+  type: OverlayType
+  onHotspotSelect?: (info: HotspotInfo | null) => void
+}) {
+  const { language } = useStore()
+  return (
+    <group>
+      <SceneForType type={type} />
+      <ModelHotspots key={type} type={type} language={language} onSelect={onHotspotSelect} />
+    </group>
+  )
 }
 
 export function ArModelStage({ overlayType }: { overlayType: OverlayType }) {
+  const [hotspot, setHotspot] = useState<HotspotInfo | null>(null)
+
   return (
     <div className="pointer-events-none absolute inset-0 z-10">
-      <Canvas
-        camera={{ position: [0, 0.35, 4.2], fov: 42 }}
-        dpr={[1, 1.5]}
-        gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
-      >
-        <ambientLight intensity={0.95} />
-        <directionalLight position={[4, 6, 3]} intensity={1.3} />
-        <pointLight position={[-3, 2, 2]} intensity={0.55} color="#f5b800" />
-        <pointLight position={[2, -1, 3]} intensity={0.35} color="#19f08b" />
-        <ArScene type={overlayType} />
-        <ContactShadows
-          position={[0, -1.2, 0]}
-          opacity={0.28}
-          scale={8}
-          blur={2}
-          far={2.5}
-        />
-      </Canvas>
-      <div className="absolute bottom-16 left-3 z-20 rounded border border-line bg-ink/80 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-soft backdrop-blur">
-        3D · {overlayType}
+      <div className="pointer-events-auto absolute inset-0">
+        <Canvas
+          camera={{ position: [0, 0.25, 5.2], fov: 40 }}
+          dpr={[1, 1.5]}
+          gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
+        >
+          <ambientLight intensity={0.95} />
+          <directionalLight position={[4, 6, 3]} intensity={1.3} />
+          <pointLight position={[-3, 2, 2]} intensity={0.55} color="#f5b800" />
+          <pointLight position={[2, -1, 3]} intensity={0.35} color="#19f08b" />
+          <group scale={0.9}>
+            <ArScene type={overlayType} onHotspotSelect={setHotspot} />
+          </group>
+          <ContactShadows
+            position={[0, -1.2, 0]}
+            opacity={0.28}
+            scale={8}
+            blur={2}
+            far={2.5}
+          />
+        </Canvas>
       </div>
+      {!hotspot && (
+        <div className="pointer-events-none absolute bottom-16 left-3 right-3 z-20">
+          <div className="inline-block max-w-full rounded border border-line bg-ink/80 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-soft backdrop-blur">
+            Tap ● numbers · {overlayType}
+          </div>
+        </div>
+      )}
+      <HotspotSheet info={hotspot} onClose={() => setHotspot(null)} />
     </div>
   )
 }

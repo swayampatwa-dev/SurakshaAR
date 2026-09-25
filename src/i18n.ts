@@ -754,14 +754,14 @@ export const ui: Dict = {
     sat: '3D ᱥᱮᱪᱮᱫ ᱢᱚᱰᱮᱞ',
   },
   modelsDesc: {
-    en: 'Industrial safety assets rendered in-session over the device camera. Built for mid-range Android demonstration.',
-    hi: 'डिवाइस कैमरे पर सत्र में दिखाए जाने वाले औद्योगिक सुरक्षा एसेट। मिड-रेंज Android डेमो के लिए।',
-    sat: 'ᱰᱤᱵᱷᱟᱭᱤᱥ ᱠᱮᱢᱮᱨᱟ ᱨᱮ ᱤᱱᱰᱚᱥᱴᱨᱤ ᱥᱩᱨᱚᱠᱷᱭᱟ 3D᱾ Mid-range Android ᱰᱮᱢᱚ ᱞᱟᱹᱜᱤᱫ᱾',
+    en: 'Tap the numbered points on each model to learn what that part is and how it works. Assets also overlay the camera in AR training.',
+    hi: 'हर मॉडल पर नंबर वाले बिंदु टैप करें — उस हिस्से का नाम और काम समझें। AR ट्रेनिंग में ये कैमरे पर भी दिखते हैं।',
+    sat: 'ᱱᱚᱢᱵᱚᱨ ᱴᱩᱯ ᱛᱮ ᱦᱟᱹᱛᱤᱧ ᱵᱟᱲᱟᱭᱢᱮ᱾ AR ᱨᱮᱦᱚᱸ ᱠᱮᱢᱮᱨᱟ ᱪᱮᱛᱟᱱ ᱧᱮᱞᱚᱜᱼᱟ᱾',
   },
   dragOrbit: {
-    en: 'Drag to orbit',
-    hi: 'घुमाने के लिए खींचें',
-    sat: 'ᱜᱷᱩᱨᱟᱹᱣ ᱞᱟᱹᱜᱤᱫ ᱴᱟᱱ',
+    en: 'Drag to orbit · tap ● to learn',
+    hi: 'घुमाएँ · ● टैप कर सीखें',
+    sat: 'ᱜᱷᱩᱨᱟᱹᱣ · ● ᱛᱮ ᱥᱮᱬᱟ',
   },
   tryDemoCert: {
     en: 'Try a demo ID',
