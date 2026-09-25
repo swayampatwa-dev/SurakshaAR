@@ -4,12 +4,11 @@ End-to-end **web prototype** for *AR-Based Vocational Training Simulator for Ind
 
 > Vite + React web MVP — camera AR + 22 3D models, Hindi/Santali/English, certificates, admin dashboard.
 
-## Live deploy (Vercel)
+## Live
 
-1. Import this repo in [Vercel](https://vercel.com/new)
-2. Framework preset: **Vite** (or leave auto — `vercel.json` is included)
-3. Build command: `npm run build` · Output: `dist`
-4. Deploy — SPA routes are rewritten to `index.html`
+**Production:** https://suraksha-ar-seven.vercel.app
+
+Repo is linked to Vercel — every push to `main` auto-deploys.
 
 ## Features
 
